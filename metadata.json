@@ -1,0 +1,8 @@
+{
+  "name": "EcoTwin - AI Environmental Digital Twin",
+  "description": "An AI-powered environmental monitoring platform that uses computer vision and citizen reporting to track urban pollution and waste violations in real-time.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
