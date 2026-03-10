@@ -20,13 +20,7 @@ const HotspotIcon = (color: string, size: number = 16) => L.divIcon({
     iconAnchor: [size / 2, size / 2]
 });
 
-// Predictive AI marker (yellow glow)
-const PredictiveIcon = L.divIcon({
-    className: 'predictive-marker',
-    html: `<div style="width:20px;height:20px;background:radial-gradient(circle, #FBBF24 0%, #F59E0B44 60%, transparent 100%);border-radius:50%;animation:pulse 2s infinite;"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
-});
+
 
 function RecenterMap({ center }: { center: [number, number] }) {
     const map = useMap();
@@ -86,7 +80,7 @@ export default function AdminMapView() {
     });
     const [timeRange, setTimeRange] = useState('Last 24 Hours');
     const [showTimeDropdown, setShowTimeDropdown] = useState(false);
-    const [predictiveAI, setPredictiveAI] = useState(true);
+
 
     // Mock hotspots around user's location
     const [hotspots, setHotspots] = useState<Hotspot[]>([]);
@@ -184,13 +178,7 @@ export default function AdminMapView() {
                     </React.Fragment>
                 ))}
 
-                {/* Predictive AI markers */}
-                {predictiveAI && (
-                    <>
-                        <Marker position={[center[0] - 0.006, center[1] + 0.004]} icon={PredictiveIcon} />
-                        <Marker position={[center[0] + 0.012, center[1] - 0.008]} icon={PredictiveIcon} />
-                    </>
-                )}
+
 
                 <RecenterMap center={center} />
                 <ZoomControls onLocate={handleLocate} />
@@ -260,31 +248,7 @@ export default function AdminMapView() {
                     </div>
                 </div>
 
-                {/* Predictive AI Card */}
-                <div className="mt-3 bg-[#0E1511]/92 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                <div className="w-3 h-3 bg-emerald-500 rounded-full" />
-                            </div>
-                            <span className="text-sm font-bold text-white">Predictive AI</span>
-                        </div>
-                        {/* Toggle Switch */}
-                        <button
-                            onClick={() => setPredictiveAI(!predictiveAI)}
-                            className={`w-12 h-6 rounded-full p-0.5 transition-colors ${predictiveAI ? 'bg-emerald-500' : 'bg-neutral-600'}`}
-                        >
-                            <motion.div
-                                className="w-5 h-5 bg-white rounded-full shadow-md"
-                                animate={{ x: predictiveAI ? 24 : 0 }}
-                                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                            />
-                        </button>
-                    </div>
-                    <p className="text-[10px] text-neutral-400 leading-relaxed">
-                        Modeling future hotspots based on satellite data & historical dumping patterns.
-                    </p>
-                </div>
+
             </div>
 
             {/* Bottom Stats */}

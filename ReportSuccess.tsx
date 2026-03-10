@@ -20,10 +20,10 @@ export default function ReportSuccess({ onBackToHome, onViewStatus, pointsEarned
         {/* Animated Rings */}
         <div className="absolute inset-0 -m-8 border border-emerald-500/10 rounded-full animate-[ping_3s_infinite]" />
         <div className="absolute inset-0 -m-4 border border-emerald-500/20 rounded-full animate-[ping_2s_infinite]" />
-        
+
         <div className="w-32 h-32 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 relative">
           <CheckCircle2 className="text-emerald-500" size={64} />
-          
+
           {/* Floating Icon */}
           <div className="absolute -top-2 -right-2 w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/40 border-4 border-[#050A05]">
             <TreeDeciduous size={20} className="text-black" />
@@ -49,17 +49,19 @@ export default function ReportSuccess({ onBackToHome, onViewStatus, pointsEarned
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="w-full max-w-[340px] bg-emerald-500/5 border border-emerald-500/20 rounded-[2rem] p-5 mb-12 relative overflow-hidden group mx-auto"
+        className="w-full max-w-[340px] bg-emerald-500/5 border border-emerald-500/20 rounded-[2rem] p-5 mb-12 relative overflow-hidden group mx-auto flex flex-col items-center justify-center"
       >
         <div className="absolute -right-4 -top-4 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
           <BarChart3 size={120} />
         </div>
-        
-        <div className="flex flex-col items-center text-center relative z-10">
+
+        <div className="flex flex-col items-center text-center relative z-10 w-full">
           <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-[0.2em] block mb-1">Rewarding Impact</span>
           <h3 className="text-lg font-bold text-white leading-tight mb-4">Impact Points Earned</h3>
-          <div className="bg-emerald-500 text-black h-12 px-8 rounded-2xl font-bold text-2xl shadow-lg shadow-emerald-500/30 flex items-center justify-center">
-            +{pointsEarned}
+          <div className="w-full flex justify-center">
+            <div className="bg-emerald-500 text-black h-12 px-10 rounded-2xl font-bold text-2xl shadow-lg shadow-emerald-500/30 flex items-center justify-center w-32">
+              +{pointsEarned}
+            </div>
           </div>
         </div>
       </motion.div>

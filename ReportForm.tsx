@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { 
-  X, 
-  Zap, 
-  Image as ImageIcon, 
-  Camera, 
-  RefreshCw, 
-  Loader2, 
-  CheckCircle2, 
+import {
+  X,
+  Zap,
+  Image as ImageIcon,
+  Camera,
+  RefreshCw,
+  Loader2,
+  CheckCircle2,
   AlertCircle,
   MapPin,
   ChevronRight,
@@ -30,7 +30,7 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedItems, setVerifiedItems] = useState<number[]>([]);
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -43,8 +43,8 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLocation({ 
-          lat: pos.coords.latitude, 
+        setLocation({
+          lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           alt: pos.coords.altitude || 12 // Mock altitude if not available
         });
@@ -138,20 +138,20 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
   };
 
   const handleSubmit = async () => {
-    if (!result || !preview) return;
+    if (!preview) return;
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch('/api/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: result.type,
-          confidence: result.confidence,
+          type: result?.type || 'manual_report',
+          confidence: result?.confidence || 1.0,
           location_lat: location?.lat || 0,
           location_lng: location?.lng || 0,
           image_url: preview,
-          description: result.description
+          description: result?.description || 'User reported issue manually'
         })
       });
 
@@ -183,13 +183,13 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
     <div className="fixed inset-0 z-50 bg-black flex flex-col overflow-hidden">
       {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-20">
-        <button 
+        <button
           onClick={onClose}
           className="p-2 bg-black/10 backdrop-blur-md rounded-full text-black hover:bg-black/20 transition-colors"
         >
           <X size={24} />
         </button>
-        
+
         <div className="flex flex-col items-center">
           <h2 className="text-black font-bold text-lg">Report Issue</h2>
           <div className="flex items-center gap-1.5">
@@ -198,7 +198,7 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
           </div>
         </div>
 
-        <button 
+        <button
           onClick={() => setIsFlashOn(!isFlashOn)}
           className={`p-2 backdrop-blur-md rounded-full transition-colors ${isFlashOn ? 'bg-yellow-500 text-black' : 'bg-black/10 text-black'}`}
         >
@@ -211,7 +211,7 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
         {!preview ? (
           <>
             {/* Camera Viewport */}
-            <video 
+            <video
               ref={videoRef}
               autoPlay
               playsInline
@@ -221,11 +221,11 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
         ) : (
           <div className="w-full h-full relative bg-neutral-900">
             <img src={preview} alt="Captured" className="w-full h-full object-contain" />
-            
+
             {/* Analysis Overlay */}
             <AnimatePresence>
               {isAnalyzing && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -246,7 +246,7 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
         {/* Result Card & Verification */}
         <AnimatePresence>
           {result && !isAnalyzing && (
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0, y: '-40%', x: '-50%' }}
               animate={{ scale: 1, opacity: 1, y: '-50%', x: '-50%' }}
               exit={{ scale: 0.9, opacity: 0, y: '-40%', x: '-50%' }}
@@ -264,16 +264,23 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
                     </div>
                   </div>
                   <p className="text-neutral-400 text-sm mb-8 leading-relaxed italic">"{result.description}"</p>
-                  
+
                   <div className="flex flex-col gap-3">
-                    <button 
+                    <button
                       onClick={() => setIsVerifying(true)}
                       className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
                     >
                       Verify Report
                       <ChevronRight size={20} />
                     </button>
-                    <button 
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="w-full py-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-500 font-bold rounded-2xl flex items-center justify-center gap-2 transition-all border border-emerald-500/30"
+                    >
+                      {isSubmitting ? <Loader2 className="animate-spin" /> : 'Submit Directly'}
+                    </button>
+                    <button
                       onClick={reset}
                       className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition-colors border border-white/10"
                     >
@@ -308,17 +315,15 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
                             setVerifiedItems(prev => [...prev, item.id]);
                           }
                         }}
-                        className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300 ${
-                          verifiedItems.includes(item.id) 
-                            ? 'bg-emerald-500/10 border-emerald-500/40 text-white' 
-                            : 'bg-white/5 border-white/10 text-neutral-400'
-                        }`}
+                        className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300 ${verifiedItems.includes(item.id)
+                          ? 'bg-emerald-500/10 border-emerald-500/40 text-white'
+                          : 'bg-white/5 border-white/10 text-neutral-400'
+                          }`}
                       >
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 shrink-0 ${
-                          verifiedItems.includes(item.id)
-                            ? 'bg-emerald-500 border-emerald-500 text-black'
-                            : 'border-white/20'
-                        }`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all duration-300 shrink-0 ${verifiedItems.includes(item.id)
+                          ? 'bg-emerald-500 border-emerald-500 text-black'
+                          : 'border-white/20'
+                          }`}>
                           {verifiedItems.includes(item.id) && <CheckCircle2 size={14} strokeWidth={3} />}
                         </div>
                         <span className="text-[11px] font-semibold text-left leading-snug">{item.text}</span>
@@ -327,13 +332,13 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
                   </div>
 
                   <div className="flex gap-3 pt-4">
-                    <button 
+                    <button
                       onClick={() => setIsVerifying(false)}
                       className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition-colors border border-white/10 text-sm"
                     >
                       Back
                     </button>
-                    <button 
+                    <button
                       onClick={handleSubmit}
                       disabled={isSubmitting || verifiedItems.length < 3}
                       className="flex-[2] py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-900/50 disabled:text-black/20 text-black font-bold rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-emerald-500/20 text-sm"
@@ -355,7 +360,7 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
           <div className="flex justify-between items-center w-full px-10 mb-10">
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              <button 
+              <button
                 onClick={open}
                 className="p-4 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-colors"
               >
@@ -363,7 +368,7 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
               </button>
             </div>
 
-            <button 
+            <button
               onClick={capturePhoto}
               className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.5)] hover:scale-105 active:scale-95 transition-transform"
             >
@@ -372,11 +377,29 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
               </div>
             </button>
 
-            <button 
+            <button
               onClick={toggleCamera}
               className="p-4 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-colors"
             >
               <RefreshCw size={24} />
+            </button>
+          </div>
+        ) : !result ? (
+          <div className="flex flex-col gap-3 w-full px-10 mb-6 relative z-50">
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-emerald-900/50 disabled:text-black/20 text-black font-bold rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-emerald-500/20 text-sm"
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={18} />}
+              Submit Manual Report
+            </button>
+            <button
+              onClick={reset}
+              disabled={isSubmitting || isAnalyzing}
+              className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition-colors border border-white/10 text-sm"
+            >
+              Cancel & Retake
             </button>
           </div>
         ) : null}
@@ -388,11 +411,10 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
               <button
                 key={m}
                 onClick={() => setMode(m)}
-                className={`px-4 py-2 rounded-full text-[10px] font-bold tracking-widest transition-all ${
-                  mode === m 
-                    ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' 
-                    : 'text-neutral-500 border border-transparent hover:text-neutral-300'
-                }`}
+                className={`px-4 py-2 rounded-full text-[10px] font-bold tracking-widest transition-all ${mode === m
+                  ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
+                  : 'text-neutral-500 border border-transparent hover:text-neutral-300'
+                  }`}
               >
                 {m}
               </button>
@@ -416,7 +438,7 @@ export default function ReportForm({ onReportSubmitted, onClose }: { onReportSub
       {/* Error Toast */}
       <AnimatePresence>
         {error && (
-          <motion.div 
+          <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 50, opacity: 0 }}
