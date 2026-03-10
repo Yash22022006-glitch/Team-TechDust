@@ -67,7 +67,7 @@ async function startServer() {
         INSERT INTO reports (type, confidence, location_lat, location_lng, image_url, description)
         VALUES (?, ?, ?, ?, ?, ?)
       `).run(type, confidence, location_lat, location_lng, image_url, description);
-      
+
       res.json({ id: info.lastInsertRowid, status: 'success' });
     } catch (err) {
       console.error("Error creating report:", err);
@@ -110,6 +110,21 @@ async function startServer() {
       res.json({ status: 'success' });
     } catch (err) {
       res.status(500).json({ error: "Failed to resolve task" });
+    }
+  });
+
+  app.patch("/api/reports/:id/status", (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, proof_image_url } = req.body;
+      if (proof_image_url) {
+        db.prepare("UPDATE reports SET status = ?, proof_image_url = ? WHERE id = ?").run(status, proof_image_url, id);
+      } else {
+        db.prepare("UPDATE reports SET status = ? WHERE id = ?").run(status, id);
+      }
+      res.json({ status: 'success' });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update status" });
     }
   });
 
